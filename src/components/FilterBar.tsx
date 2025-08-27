@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import FilterButton from "./FilterButton";
+import FilterDropdown from "./FilterDropdown";
+import FilterCheckbox from "./FilterCheckbox";
 
 interface FilterBarProps {
   onGenreFilter: (genres: string[]) => void;
@@ -32,7 +35,6 @@ const FilterBar = ({
   const [tempYears, setTempYears] = useState<string[]>(selectedYears);
   const [tempSort, setTempSort] = useState<string>(selectedSort);
 
-  // Update temp states when props change
   useEffect(() => {
     setTempGenres(selectedGenres);
     setTempYears(selectedYears);
@@ -113,296 +115,115 @@ const FilterBar = ({
       {/* Horizontal Filter Buttons */}
       <div className="flex items-center gap-4 flex-wrap justify-center">
         {/* Sort Button */}
-        <div className="relative filter-dropdown">
-          <button
-            onClick={() => toggleDropdown("sort")}
-            className={`px-6 py-3 border rounded-2xl text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
-              selectedSort !== "rating-desc"
-                ? "bg-gradient-to-r from-purple-500 to-pink-600 text-white border-purple-500 shadow-lg shadow-purple-500/25"
-                : "bg-white/80 backdrop-blur-sm border-gray-200 text-gray-700 hover:bg-white hover:shadow-lg"
-            }`}
-          >
-            <span>SORT</span>
-            <svg
-              className={`w-4 h-4 transition-transform duration-300 ${
-                activeDropdown === "sort" ? "rotate-180" : ""
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </button>
-
-          {/* Sort Dropdown Modal */}
+        <FilterButton
+          label="SORT"
+          isActive={selectedSort !== "rating-desc"}
+          isOpen={activeDropdown === "sort"}
+          onClick={() => toggleDropdown("sort")}
+          activeColor="purple"
+        >
           {activeDropdown === "sort" && (
-            <div className="absolute top-full left-0 mt-2 w-48 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-xl z-50">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-gray-800">
-                    Sort Options
-                  </h3>
-                  <button
-                    onClick={closeDropdowns}
-                    className="text-gray-400 hover:text-gray-600 transition-colors duration-200"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </div>
-
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {availableSortOptions.map((sortOption) => (
-                    <label
-                      key={sortOption}
-                      className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-3 rounded-xl transition-colors duration-200"
-                    >
-                      <input
-                        type="radio"
-                        name="sort"
-                        checked={tempSort === sortOption}
-                        onChange={() => handleSortChange(sortOption)}
-                        className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500 focus:ring-2"
-                      />
-                      <span className="text-sm font-medium text-gray-700">
-                        {sortOption === "rating-desc" && "Highest Rating First"}
-                        {sortOption === "rating-asc" && "Lowest Rating First"}
-                        {sortOption === "year-desc" && "Newest First"}
-                        {sortOption === "year-asc" && "Oldest First"}
-                        {sortOption === "title-asc" && "Title A-Z"}
-                        {sortOption === "title-desc" && "Title Z-A"}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200 mt-4">
-                  <button
-                    onClick={handleClearSort}
-                    className="text-purple-600 text-sm font-medium hover:text-purple-700 transition-colors duration-200"
-                  >
-                    Reset
-                  </button>
-                  <button
-                    onClick={handleApplySort}
-                    className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl text-sm font-medium hover:from-purple-600 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-            </div>
+            <FilterDropdown
+              title="Sort Options"
+              onClose={closeDropdowns}
+              onClear={handleClearSort}
+              onApply={handleApplySort}
+              clearLabel="Reset"
+              width="sm"
+            >
+              {availableSortOptions.map((sortOption) => (
+                <FilterCheckbox
+                  key={sortOption}
+                  id={`sort-${sortOption}`}
+                  label={
+                    sortOption === "rating-desc"
+                      ? "Highest Rating First"
+                      : sortOption === "rating-asc"
+                      ? "Lowest Rating First"
+                      : sortOption === "year-desc"
+                      ? "Newest First"
+                      : sortOption === "year-asc"
+                      ? "Oldest First"
+                      : sortOption === "title-asc"
+                      ? "Title A-Z"
+                      : sortOption === "title-desc"
+                      ? "Title Z-A"
+                      : "Highest Rating First"
+                  }
+                  checked={tempSort === sortOption}
+                  onChange={() => handleSortChange(sortOption)}
+                  type="radio"
+                  name="sort"
+                  color="purple"
+                />
+              ))}
+            </FilterDropdown>
           )}
-        </div>
+        </FilterButton>
 
         {/* Genre Filter Button */}
-        <div className="relative filter-dropdown">
-          <button
-            onClick={() => toggleDropdown("genre")}
-            className={`px-6 py-3 border rounded-2xl text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
-              selectedGenres.length > 0
-                ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-blue-500 shadow-lg shadow-blue-500/25"
-                : "bg-white/80 backdrop-blur-sm border-gray-200 text-gray-700 hover:bg-white hover:shadow-lg"
-            }`}
-          >
-            <span>
-              GENRE {selectedGenres.length > 0 && `(${selectedGenres.length})`}
-            </span>
-            <svg
-              className={`w-4 h-4 transition-transform duration-300 ${
-                activeDropdown === "genre" ? "rotate-180" : ""
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </button>
-
-          {/* Genre Dropdown Modal */}
+        <FilterButton
+          label="GENRE"
+          isActive={selectedGenres.length > 0}
+          isOpen={activeDropdown === "genre"}
+          count={selectedGenres.length}
+          onClick={() => toggleDropdown("genre")}
+          activeColor="blue"
+        >
           {activeDropdown === "genre" && (
-            <div className="absolute top-full left-0 mt-2 w-72 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-xl z-50">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-gray-800">
-                    Genre Filter
-                  </h3>
-                  <button
-                    onClick={closeDropdowns}
-                    className="text-gray-400 hover:text-gray-600 transition-colors duration-200"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </div>
-
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {availableGenres.map((genre) => (
-                    <label
-                      key={genre}
-                      className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-3 rounded-xl transition-colors duration-200"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={tempGenres.includes(genre)}
-                        onChange={() => handleGenreToggle(genre)}
-                        className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 focus:ring-2"
-                      />
-                      <span className="text-sm font-medium text-gray-700">
-                        {genre}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200 mt-4">
-                  <button
-                    onClick={handleClearGenre}
-                    className="text-blue-600 text-sm font-medium hover:text-blue-700 transition-colors duration-200"
-                  >
-                    Clear All
-                  </button>
-                  <button
-                    onClick={handleApplyGenre}
-                    className="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl text-sm font-medium hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-            </div>
+            <FilterDropdown
+              title="Genre Filter"
+              onClose={closeDropdowns}
+              onClear={handleClearGenre}
+              onApply={handleApplyGenre}
+              width="lg"
+            >
+              {availableGenres.map((genre) => (
+                <FilterCheckbox
+                  key={genre}
+                  id={`genre-${genre}`}
+                  label={genre}
+                  checked={tempGenres.includes(genre)}
+                  onChange={() => handleGenreToggle(genre)}
+                  type="checkbox"
+                  color="blue"
+                />
+              ))}
+            </FilterDropdown>
           )}
-        </div>
+        </FilterButton>
 
         {/* Year Filter Button */}
-        <div className="relative filter-dropdown">
-          <button
-            onClick={() => toggleDropdown("year")}
-            className={`px-6 py-3 border rounded-2xl text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
-              selectedYears.length > 0
-                ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-500 shadow-lg shadow-green-500/25"
-                : "bg-white/80 backdrop-blur-sm border-gray-200 text-gray-700 hover:bg-white hover:shadow-lg"
-            }`}
-          >
-            <span>
-              YEAR {selectedYears.length > 0 && `(${selectedYears.length})`}
-            </span>
-            <svg
-              className={`w-4 h-4 transition-transform duration-300 ${
-                activeDropdown === "year" ? "rotate-180" : ""
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </button>
-
-          {/* Year Dropdown Modal */}
+        <FilterButton
+          label="YEAR"
+          isActive={selectedYears.length > 0}
+          isOpen={activeDropdown === "year"}
+          count={selectedYears.length}
+          onClick={() => toggleDropdown("year")}
+          activeColor="green"
+        >
           {activeDropdown === "year" && (
-            <div className="absolute top-full left-0 mt-2 w-56 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-xl z-50">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-gray-800">
-                    Year Filter
-                  </h3>
-                  <button
-                    onClick={closeDropdowns}
-                    className="text-gray-400 hover:text-gray-600 transition-colors duration-200"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </div>
-
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {availableYears.map((year) => (
-                    <label
-                      key={year}
-                      className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-3 rounded-xl transition-colors duration-200"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={tempYears.includes(year.toString())}
-                        onChange={() => handleYearToggle(year.toString())}
-                        className="w-4 h-4 text-green-600 rounded border-gray-300 focus:ring-green-500 focus:ring-2"
-                      />
-                      <span className="text-sm font-medium text-gray-700">
-                        {year}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200 mt-4">
-                  <button
-                    onClick={handleClearYear}
-                    className="text-green-600 text-sm font-medium hover:text-green-700 transition-colors duration-200"
-                  >
-                    Clear All
-                  </button>
-                  <button
-                    onClick={handleApplyYear}
-                    className="px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl text-sm font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-            </div>
+            <FilterDropdown
+              title="Year Filter"
+              onClose={closeDropdowns}
+              onClear={handleClearYear}
+              onApply={handleApplyYear}
+              width="md"
+            >
+              {availableYears.map((year) => (
+                <FilterCheckbox
+                  key={year}
+                  id={`year-${year}`}
+                  label={year.toString()}
+                  checked={tempYears.includes(year.toString())}
+                  onChange={() => handleYearToggle(year.toString())}
+                  type="checkbox"
+                  color="green"
+                />
+              ))}
+            </FilterDropdown>
           )}
-        </div>
+        </FilterButton>
 
         {/* Clear All Filters Button */}
         {hasActiveFilters && (
