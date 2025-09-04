@@ -12,6 +12,7 @@ export default function Home() {
     selectedGenres,
     selectedYears,
     selectedSort,
+    selectedRating,
     hasActiveFilters,
     filteredMovies,
     availableGenres,
@@ -20,8 +21,10 @@ export default function Home() {
     handleSearch,
     handleGenreFilter,
     handleYearFilter,
+    handleRatingFilter,
     handleSortChange,
     handleClearFilters,
+    availableRatings,
   } = useMovieFilters();
 
   return (
@@ -46,13 +49,16 @@ export default function Home() {
           <FilterBar
             onGenreFilter={handleGenreFilter}
             onYearFilter={handleYearFilter}
+            onRatingFilter={handleRatingFilter}
             onSortChange={handleSortChange}
             onClearFilters={handleClearFilters}
             selectedGenres={selectedGenres}
             selectedYears={selectedYears}
             selectedSort={selectedSort}
+            selectedRating={selectedRating}
             availableGenres={availableGenres}
             availableYears={availableYears}
+            availableRatings={availableRatings}
             availableSortOptions={availableSortOptions}
           />
         </div>

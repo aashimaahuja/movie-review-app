@@ -8,6 +8,7 @@ import FilterCheckbox from "./FilterCheckbox";
 interface FilterBarProps {
   onGenreFilter: (genres: string[]) => void;
   onYearFilter: (years: string[]) => void;
+  onRatingFilter: (ratings: string[]) => void;
   onSortChange: (sortOption: string) => void;
   onClearFilters: () => void;
   selectedGenres: string[];
@@ -16,17 +17,22 @@ interface FilterBarProps {
   availableGenres: string[];
   availableYears: number[];
   availableSortOptions: string[];
+  availableRatings: number[];
+  selectedRating: string[];
 }
 
 const FilterBar = ({
   onGenreFilter,
   onYearFilter,
+  onRatingFilter,
   onSortChange,
   onClearFilters,
   selectedGenres,
   selectedYears,
+  selectedRating,
   selectedSort,
   availableGenres,
+  availableRatings,
   availableYears,
   availableSortOptions,
 }: FilterBarProps) => {
@@ -34,12 +40,14 @@ const FilterBar = ({
   const [tempGenres, setTempGenres] = useState<string[]>(selectedGenres);
   const [tempYears, setTempYears] = useState<string[]>(selectedYears);
   const [tempSort, setTempSort] = useState<string>(selectedSort);
+  const [tempRating, setTempRating] = useState<string[]>(selectedRating);
 
   useEffect(() => {
     setTempGenres(selectedGenres);
     setTempYears(selectedYears);
     setTempSort(selectedSort);
-  }, [selectedGenres, selectedYears, selectedSort]);
+    setTempRating(selectedRating);
+  }, [selectedGenres, selectedYears, selectedSort, selectedRating]);
 
   const handleGenreToggle = (genre: string) => {
     setTempGenres((prev) =>
@@ -50,6 +58,14 @@ const FilterBar = ({
   const handleYearToggle = (year: string) => {
     setTempYears((prev) =>
       prev.includes(year) ? prev.filter((y) => y !== year) : [...prev, year]
+    );
+  };
+
+  const handleRatingToggle = (rating: string) => {
+    setTempRating((prev) =>
+      prev.includes(rating)
+        ? prev.filter((r) => r !== rating)
+        : [...prev, rating]
     );
   };
 
@@ -64,6 +80,11 @@ const FilterBar = ({
 
   const handleApplyYear = () => {
     onYearFilter(tempYears);
+    setActiveDropdown(null);
+  };
+
+  const handleApplyRating = () => {
+    onRatingFilter(tempRating);
     setActiveDropdown(null);
   };
 
@@ -85,6 +106,11 @@ const FilterBar = ({
   const handleClearSort = () => {
     setTempSort("rating-desc");
     onSortChange("rating-desc");
+  };
+
+  const handleClearRating = () => {
+    setTempRating([]);
+    onRatingFilter([]);
   };
 
   const hasActiveFilters =
@@ -187,6 +213,37 @@ const FilterBar = ({
                   onChange={() => handleGenreToggle(genre)}
                   type="checkbox"
                   color="blue"
+                />
+              ))}
+            </FilterDropdown>
+          )}
+        </FilterButton>
+
+        <FilterButton
+          label="RATING"
+          isActive={selectedRating.length > 0}
+          isOpen={activeDropdown === "rating"}
+          count={selectedRating.length}
+          onClick={() => toggleDropdown("rating")}
+          activeColor="green"
+        >
+          {activeDropdown === "rating" && (
+            <FilterDropdown
+              title="Rating Filter"
+              onClose={closeDropdowns}
+              onClear={handleClearRating}
+              onApply={handleApplyRating}
+              width="md"
+            >
+              {availableRatings.map((rating) => (
+                <FilterCheckbox
+                  key={rating}
+                  id={`rating-${rating}`}
+                  label={rating.toString()}
+                  checked={tempRating.includes(rating.toString())}
+                  onChange={() => handleRatingToggle(rating.toString())}
+                  type="checkbox"
+                  color="green"
                 />
               ))}
             </FilterDropdown>

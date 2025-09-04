@@ -6,7 +6,7 @@ export const useMovieFilters = () => {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedYears, setSelectedYears] = useState<string[]>([]);
   const [selectedSort, setSelectedSort] = useState<string>("rating-desc");
-
+  const [selectedRating, setSelectedRating] = useState<string[]>([]);
   // Get unique genres and years from movies data
   const availableGenres = useMemo(() => {
     const genres = movies.flatMap((movie) => movie.genre);
@@ -29,6 +29,11 @@ export const useMovieFilters = () => {
     ],
     []
   );
+
+  const availableRatings = useMemo(() => {
+    const ratings = movies.map((movie) => movie.rating);
+    return Array.from(new Set(ratings)).sort((a, b) => b - a); // Sort descending
+  }, []);
 
   // Filter and sort movies based on search query, filters, and sort option
   const filteredMovies = useMemo(() => {
@@ -55,6 +60,13 @@ export const useMovieFilters = () => {
       );
     }
 
+    // Apply rating filter
+    if (selectedRating.length > 0) {
+      filtered = filtered.filter((movie) =>
+        selectedRating.includes(movie.rating.toString())
+      );
+    }
+
     // Apply sorting
     const sorted = [...filtered].sort((a, b) => {
       switch (selectedSort) {
@@ -76,7 +88,7 @@ export const useMovieFilters = () => {
     });
 
     return sorted;
-  }, [searchQuery, selectedGenres, selectedYears, selectedSort]);
+  }, [searchQuery, selectedGenres, selectedYears, selectedSort, selectedRating]);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -90,6 +102,10 @@ export const useMovieFilters = () => {
     setSelectedYears(years);
   };
 
+  const handleRatingFilter = (ratings: string[]) => {
+    setSelectedRating(ratings);
+  };
+
   const handleSortChange = (sortOption: string) => {
     setSelectedSort(sortOption);
   };
@@ -97,6 +113,7 @@ export const useMovieFilters = () => {
   const handleClearFilters = () => {
     setSelectedGenres([]);
     setSelectedYears([]);
+    setSelectedRating([]);
     setSelectedSort("rating-desc");
   };
 
@@ -109,6 +126,7 @@ export const useMovieFilters = () => {
     selectedGenres,
     selectedYears,
     selectedSort,
+    selectedRating,
     hasActiveFilters,
 
     // Computed values
@@ -116,12 +134,13 @@ export const useMovieFilters = () => {
     availableGenres,
     availableYears,
     availableSortOptions,
-
+    availableRatings,
     // Handlers
     setSearchQuery,
     handleSearch,
     handleGenreFilter,
     handleYearFilter,
+    handleRatingFilter,
     handleSortChange,
     handleClearFilters,
   };
