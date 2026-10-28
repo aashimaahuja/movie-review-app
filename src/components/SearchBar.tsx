@@ -4,14 +4,24 @@ import { useState, useEffect, useCallback } from "react";
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
+  value?: string;
   placeholder?: string;
 }
 
 const SearchBar = ({
   onSearch,
+  value,
   placeholder = "Search movies...",
 }: SearchBarProps) => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(value ?? "");
+
+  useEffect(() => {
+    if (value === undefined) {
+      return;
+    }
+
+    setSearchQuery(value);
+  }, [value]);
 
   // Debounced search effect
   useEffect(() => {
@@ -36,9 +46,15 @@ const SearchBar = ({
     onSearch("");
   }, [onSearch]);
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Escape" && searchQuery) {
+      handleClear();
+    }
+  };
+
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <form onSubmit={handleSearch} className="relative">
+      <form onSubmit={handleSearch} className="relative" role="search">
         <div className="relative">
           {/* Search Icon */}
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -47,6 +63,7 @@ const SearchBar = ({
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
@@ -59,9 +76,10 @@ const SearchBar = ({
 
           {/* Search Input */}
           <input
-            type="text"
+            type="search"
             value={searchQuery}
             onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
             placeholder={placeholder}
             className="w-full pl-12 pr-20 py-3 bg-white border border-gray-300 rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500"
             aria-label="Search movies by name"

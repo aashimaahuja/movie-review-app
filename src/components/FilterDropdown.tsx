@@ -47,7 +47,9 @@ const FilterDropdown = ({
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-bold text-gray-800">{title}</h3>
           <button
+            type="button"
             onClick={onClose}
+            aria-label={`Close ${title}`}
             className="text-gray-400 hover:text-gray-600 transition-colors duration-200"
           >
             <svg
@@ -74,7 +76,9 @@ const FilterDropdown = ({
           <div className="flex items-center justify-between pt-4 border-t border-gray-200 mt-4">
             {onClear && (
               <button
+                type="button"
                 onClick={onClear}
+                aria-label={`${clearLabel} ${title}`}
                 className="text-gray-600 text-sm font-medium hover:text-gray-700 transition-colors duration-200"
               >
                 {clearLabel}
@@ -82,7 +86,9 @@ const FilterDropdown = ({
             )}
             {onApply && (
               <button
+                type="button"
                 onClick={onApply}
+                aria-label={`${applyLabel} ${title}`}
                 className="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl text-sm font-medium hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
               >
                 {applyLabel}

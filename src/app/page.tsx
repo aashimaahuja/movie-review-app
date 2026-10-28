@@ -41,7 +41,7 @@ export default function Home() {
           </p>
 
           {/* Search Bar */}
-          <SearchBar onSearch={handleSearch} />
+          <SearchBar value={searchQuery} onSearch={handleSearch} />
         </div>
 
         {/* Filter Bar */}
@@ -112,12 +112,41 @@ export default function Home() {
           </div>
         )}
 
-        {/* Movies Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-12">
-          {filteredMovies.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} />
-          ))}
-        </div>
+        {/* Movies Grid / Empty State */}
+        {filteredMovies.length === 0 ? (
+          <div
+            className="mb-12 flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-white/60 px-6 py-16 text-center"
+            role="status"
+            aria-live="polite"
+          >
+            <h2 className="mb-2 text-2xl font-semibold text-gray-800">
+              No movies found
+            </h2>
+            <p className="mb-6 max-w-md text-gray-600">
+              No movies match your current name and genre filters. Try a
+              different search or clear your filters to see the full list.
+            </p>
+            {(searchQuery || hasActiveFilters) && (
+              <button
+                type="button"
+                onClick={() => {
+                  handleSearch("");
+                  handleClearFilters();
+                }}
+                aria-label="Clear search and filters"
+                className="rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-3 text-sm font-medium text-white shadow-lg transition-all duration-300 hover:from-blue-600 hover:to-indigo-700 hover:shadow-xl"
+              >
+                Clear search and filters
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="mb-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filteredMovies.map((movie) => (
+              <MovieCard key={movie.id} movie={movie} />
+            ))}
+          </div>
+        )}
 
         {/* Footer Note */}
         <div className="text-center pt-8 border-t border-gray-200">

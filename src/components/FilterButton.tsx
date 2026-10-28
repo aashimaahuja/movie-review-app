@@ -50,7 +50,13 @@ const FilterButton = ({
   return (
     <div className="relative filter-dropdown">
       <button
+        type="button"
         onClick={onClick}
+        aria-label={`${label.toLowerCase()} options${
+          count && count > 0 ? `, ${count} selected` : ""
+        }`}
+        aria-expanded={isOpen}
+        aria-haspopup="true"
         className={`px-6 py-3 border rounded-2xl text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
           isActive
             ? getActiveStyles()
