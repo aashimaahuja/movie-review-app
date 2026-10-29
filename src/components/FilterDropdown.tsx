@@ -47,8 +47,10 @@ const FilterDropdown = ({
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-bold text-gray-800">{title}</h3>
           <button
+            type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors duration-200"
+            className="text-gray-400 hover:text-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+            aria-label={`Close ${title}`}
           >
             <svg
               className="w-5 h-5"
@@ -74,16 +76,18 @@ const FilterDropdown = ({
           <div className="flex items-center justify-between pt-4 border-t border-gray-200 mt-4">
             {onClear && (
               <button
+                type="button"
                 onClick={onClear}
-                className="text-gray-600 text-sm font-medium hover:text-gray-700 transition-colors duration-200"
+                className="text-gray-600 text-sm font-medium hover:text-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
               >
                 {clearLabel}
               </button>
             )}
             {onApply && (
               <button
+                type="button"
                 onClick={onApply}
-                className="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl text-sm font-medium hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                className="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl text-sm font-medium hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
                 {applyLabel}
               </button>
