@@ -1,52 +1,65 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 
-interface SearchBarProps {
+type SearchBarProps = {
+  value: string;
   onSearch: (query: string) => void;
   placeholder?: string;
-}
+};
 
 const SearchBar = ({
+  value,
   onSearch,
-  placeholder = "Search movies...",
+  placeholder = "Search movies by title...",
 }: SearchBarProps) => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [inputValue, setInputValue] = useState(value);
 
-  // Debounced search effect
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
+
   useEffect(() => {
     const timer = setTimeout(() => {
-      onSearch(searchQuery);
+      if (inputValue !== value) {
+        onSearch(inputValue);
+      }
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchQuery, onSearch]);
+  }, [inputValue, onSearch, value]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(event.target.value);
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSearch(searchQuery);
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    onSearch(inputValue);
   };
 
-  const handleClear = useCallback(() => {
-    setSearchQuery("");
+  const handleClear = () => {
+    setInputValue("");
     onSearch("");
-  }, [onSearch]);
+  };
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <form onSubmit={handleSearch} className="relative">
+      <form onSubmit={handleSubmit} className="relative" role="search">
+        <label
+          htmlFor="movie-search"
+          className="block text-left text-sm font-medium text-gray-700 mb-2"
+        >
+          Search by title
+        </label>
         <div className="relative">
-          {/* Search Icon */}
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
             <svg
               className="h-5 w-5 text-gray-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
@@ -57,22 +70,21 @@ const SearchBar = ({
             </svg>
           </div>
 
-          {/* Search Input */}
           <input
-            type="text"
-            value={searchQuery}
+            id="movie-search"
+            type="search"
+            value={inputValue}
             onChange={handleInputChange}
             placeholder={placeholder}
             className="w-full pl-12 pr-20 py-3 bg-white border border-gray-300 rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500"
-            aria-label="Search movies by name"
+            aria-label="Search movies by title"
           />
 
-          {/* Clear Button */}
-          {searchQuery && (
+          {inputValue && (
             <button
               type="button"
               onClick={handleClear}
-              className="absolute inset-y-0 right-16 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+              className="absolute inset-y-0 right-16 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
               aria-label="Clear search"
             >
               <svg
@@ -80,6 +92,7 @@ const SearchBar = ({
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -91,11 +104,10 @@ const SearchBar = ({
             </button>
           )}
 
-          {/* Search Button */}
           <button
             type="submit"
             className="absolute inset-y-0 right-0 flex items-center px-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-r-2xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            aria-label="Search"
+            aria-label="Submit search"
           >
             Search
           </button>

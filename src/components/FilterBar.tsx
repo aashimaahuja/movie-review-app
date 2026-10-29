@@ -1,53 +1,31 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import FilterButton from "./FilterButton";
-import FilterDropdown from "./FilterDropdown";
-import FilterCheckbox from "./FilterCheckbox";
+import FilterButton from "@/components/FilterButton";
+import FilterDropdown from "@/components/FilterDropdown";
+import FilterCheckbox from "@/components/FilterCheckbox";
 
-interface FilterBarProps {
+type FilterBarProps = {
   onGenreFilter: (genres: string[]) => void;
-  onYearFilter: (years: string[]) => void;
-  onRatingFilter: (ratings: string[]) => void;
-  onSortChange: (sortOption: string) => void;
   onClearFilters: () => void;
   selectedGenres: string[];
-  selectedYears: string[];
-  selectedSort: string;
   availableGenres: string[];
-  availableYears: number[];
-  availableSortOptions: string[];
-  availableRatings: number[];
-  selectedRating: string[];
-}
+  hasActiveFilters: boolean;
+};
 
 const FilterBar = ({
   onGenreFilter,
-  onYearFilter,
-  onRatingFilter,
-  onSortChange,
   onClearFilters,
   selectedGenres,
-  selectedYears,
-  selectedRating,
-  selectedSort,
   availableGenres,
-  availableRatings,
-  availableYears,
-  availableSortOptions,
+  hasActiveFilters,
 }: FilterBarProps) => {
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [isGenreOpen, setIsGenreOpen] = useState(false);
   const [tempGenres, setTempGenres] = useState<string[]>(selectedGenres);
-  const [tempYears, setTempYears] = useState<string[]>(selectedYears);
-  const [tempSort, setTempSort] = useState<string>(selectedSort);
-  const [tempRating, setTempRating] = useState<string[]>(selectedRating);
 
   useEffect(() => {
     setTempGenres(selectedGenres);
-    setTempYears(selectedYears);
-    setTempSort(selectedSort);
-    setTempRating(selectedRating);
-  }, [selectedGenres, selectedYears, selectedSort, selectedRating]);
+  }, [selectedGenres]);
 
   const handleGenreToggle = (genre: string) => {
     setTempGenres((prev) =>
@@ -55,42 +33,9 @@ const FilterBar = ({
     );
   };
 
-  const handleYearToggle = (year: string) => {
-    setTempYears((prev) =>
-      prev.includes(year) ? prev.filter((y) => y !== year) : [...prev, year]
-    );
-  };
-
-  const handleRatingToggle = (rating: string) => {
-    setTempRating((prev) =>
-      prev.includes(rating)
-        ? prev.filter((r) => r !== rating)
-        : [...prev, rating]
-    );
-  };
-
-  const handleSortChange = (sortOption: string) => {
-    setTempSort(sortOption);
-  };
-
   const handleApplyGenre = () => {
     onGenreFilter(tempGenres);
-    setActiveDropdown(null);
-  };
-
-  const handleApplyYear = () => {
-    onYearFilter(tempYears);
-    setActiveDropdown(null);
-  };
-
-  const handleApplyRating = () => {
-    onRatingFilter(tempRating);
-    setActiveDropdown(null);
-  };
-
-  const handleApplySort = () => {
-    onSortChange(tempSort);
-    setActiveDropdown(null);
+    setIsGenreOpen(false);
   };
 
   const handleClearGenre = () => {
@@ -98,108 +43,65 @@ const FilterBar = ({
     onGenreFilter([]);
   };
 
-  const handleClearYear = () => {
-    setTempYears([]);
-    onYearFilter([]);
+  const handleToggleGenreDropdown = () => {
+    setIsGenreOpen((prev) => !prev);
   };
 
-  const handleClearSort = () => {
-    setTempSort("rating-desc");
-    onSortChange("rating-desc");
+  const handleCloseDropdown = () => {
+    setIsGenreOpen(false);
+    setTempGenres(selectedGenres);
   };
 
-  const handleClearRating = () => {
-    setTempRating([]);
-    onRatingFilter([]);
+  const handleClearAll = () => {
+    setTempGenres([]);
+    setIsGenreOpen(false);
+    onClearFilters();
   };
 
-  const hasActiveFilters =
-    selectedGenres.length > 0 || selectedYears.length > 0;
-
-  const toggleDropdown = (dropdown: string) => {
-    setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
-  };
-
-  const closeDropdowns = () => {
-    setActiveDropdown(null);
-  };
-
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (!(event.target as Element).closest(".filter-dropdown")) {
-        closeDropdowns();
+        setIsGenreOpen(false);
+        setTempGenres(selectedGenres);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsGenreOpen(false);
+        setTempGenres(selectedGenres);
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [selectedGenres]);
 
   return (
     <div className="w-full max-w-6xl mx-auto mb-8">
-      {/* Horizontal Filter Buttons */}
-      <div className="flex items-center gap-4 flex-wrap justify-center">
-        {/* Sort Button */}
+      <div
+        className="flex items-center gap-4 flex-wrap justify-center"
+        role="group"
+        aria-label="Movie filters"
+      >
         <FilterButton
-          label="SORT"
-          isActive={selectedSort !== "rating-desc"}
-          isOpen={activeDropdown === "sort"}
-          onClick={() => toggleDropdown("sort")}
-          activeColor="purple"
-        >
-          {activeDropdown === "sort" && (
-            <FilterDropdown
-              title="Sort Options"
-              onClose={closeDropdowns}
-              onClear={handleClearSort}
-              onApply={handleApplySort}
-              clearLabel="Reset"
-              width="sm"
-            >
-              {availableSortOptions.map((sortOption) => (
-                <FilterCheckbox
-                  key={sortOption}
-                  id={`sort-${sortOption}`}
-                  label={
-                    sortOption === "rating-desc"
-                      ? "Highest Rating First"
-                      : sortOption === "rating-asc"
-                      ? "Lowest Rating First"
-                      : sortOption === "year-desc"
-                      ? "Newest First"
-                      : sortOption === "year-asc"
-                      ? "Oldest First"
-                      : sortOption === "title-asc"
-                      ? "Title A-Z"
-                      : sortOption === "title-desc"
-                      ? "Title Z-A"
-                      : "Highest Rating First"
-                  }
-                  checked={tempSort === sortOption}
-                  onChange={() => handleSortChange(sortOption)}
-                  type="radio"
-                  name="sort"
-                  color="purple"
-                />
-              ))}
-            </FilterDropdown>
-          )}
-        </FilterButton>
-
-        {/* Genre Filter Button */}
-        <FilterButton
-          label="GENRE"
+          label="Genre"
           isActive={selectedGenres.length > 0}
-          isOpen={activeDropdown === "genre"}
+          isOpen={isGenreOpen}
           count={selectedGenres.length}
-          onClick={() => toggleDropdown("genre")}
+          onClick={handleToggleGenreDropdown}
           activeColor="blue"
+          ariaLabel="Filter movies by genre"
         >
-          {activeDropdown === "genre" && (
+          {isGenreOpen && (
             <FilterDropdown
               title="Genre Filter"
-              onClose={closeDropdowns}
+              onClose={handleCloseDropdown}
               onClear={handleClearGenre}
               onApply={handleApplyGenre}
               width="lg"
@@ -219,108 +121,30 @@ const FilterBar = ({
           )}
         </FilterButton>
 
-        <FilterButton
-          label="RATING"
-          isActive={selectedRating.length > 0}
-          isOpen={activeDropdown === "rating"}
-          count={selectedRating.length}
-          onClick={() => toggleDropdown("rating")}
-          activeColor="green"
-        >
-          {activeDropdown === "rating" && (
-            <FilterDropdown
-              title="Rating Filter"
-              onClose={closeDropdowns}
-              onClear={handleClearRating}
-              onApply={handleApplyRating}
-              width="md"
-            >
-              {availableRatings.map((rating) => (
-                <FilterCheckbox
-                  key={rating}
-                  id={`rating-${rating}`}
-                  label={rating.toString()}
-                  checked={tempRating.includes(rating.toString())}
-                  onChange={() => handleRatingToggle(rating.toString())}
-                  type="checkbox"
-                  color="green"
-                />
-              ))}
-            </FilterDropdown>
-          )}
-        </FilterButton>
-
-        {/* Year Filter Button */}
-        <FilterButton
-          label="YEAR"
-          isActive={selectedYears.length > 0}
-          isOpen={activeDropdown === "year"}
-          count={selectedYears.length}
-          onClick={() => toggleDropdown("year")}
-          activeColor="green"
-        >
-          {activeDropdown === "year" && (
-            <FilterDropdown
-              title="Year Filter"
-              onClose={closeDropdowns}
-              onClear={handleClearYear}
-              onApply={handleApplyYear}
-              width="md"
-            >
-              {availableYears.map((year) => (
-                <FilterCheckbox
-                  key={year}
-                  id={`year-${year}`}
-                  label={year.toString()}
-                  checked={tempYears.includes(year.toString())}
-                  onChange={() => handleYearToggle(year.toString())}
-                  type="checkbox"
-                  color="green"
-                />
-              ))}
-            </FilterDropdown>
-          )}
-        </FilterButton>
-
-        {/* Clear All Filters Button */}
         {hasActiveFilters && (
           <button
-            onClick={onClearFilters}
-            className="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-2xl text-sm font-medium hover:from-red-600 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+            type="button"
+            onClick={handleClearAll}
+            className="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-2xl text-sm font-medium hover:from-red-600 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            aria-label="Clear all filters"
           >
             Clear All
           </button>
         )}
       </div>
 
-      {/* Active Filters Display */}
-      {hasActiveFilters && (
+      {selectedGenres.length > 0 && (
         <div className="mt-6 text-center">
-          <div className="inline-flex items-center gap-3 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200">
-            <svg
-              className="w-5 h-5 text-blue-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <span className="text-gray-700 font-medium">Active filters:</span>
-            {selectedGenres.length > 0 && (
-              <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium border border-blue-200">
-                Genres: {selectedGenres.join(", ")}
+          <div className="inline-flex flex-wrap items-center justify-center gap-3 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200">
+            <span className="text-gray-700 font-medium">Active genres:</span>
+            {selectedGenres.map((genre) => (
+              <span
+                key={genre}
+                className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium border border-blue-200"
+              >
+                {genre}
               </span>
-            )}
-            {selectedYears.length > 0 && (
-              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium border border-green-200">
-                Years: {selectedYears.join(", ")}
-              </span>
-            )}
+            ))}
           </div>
         </div>
       )}

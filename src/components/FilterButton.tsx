@@ -2,7 +2,7 @@
 
 import { ReactNode } from "react";
 
-interface FilterButtonProps {
+type FilterButtonProps = {
   label: string;
   isActive: boolean;
   isOpen: boolean;
@@ -10,7 +10,8 @@ interface FilterButtonProps {
   onClick: () => void;
   children?: ReactNode;
   activeColor?: "blue" | "green" | "purple";
-}
+  ariaLabel?: string;
+};
 
 const FilterButton = ({
   label,
@@ -20,6 +21,7 @@ const FilterButton = ({
   onClick,
   children,
   activeColor = "blue",
+  ariaLabel,
 }: FilterButtonProps) => {
   const getActiveStyles = () => {
     switch (activeColor) {
@@ -34,31 +36,23 @@ const FilterButton = ({
     }
   };
 
-  const getActiveCountColor = () => {
-    switch (activeColor) {
-      case "blue":
-        return "text-blue-100";
-      case "green":
-        return "text-green-100";
-      case "purple":
-        return "text-purple-100";
-      default:
-        return "text-blue-100";
-    }
-  };
-
   return (
     <div className="relative filter-dropdown">
       <button
+        type="button"
         onClick={onClick}
-        className={`px-6 py-3 border rounded-2xl text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
+        className={`px-6 py-3 border rounded-2xl text-sm font-medium transition-all duration-300 flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
           isActive
             ? getActiveStyles()
             : "bg-white/80 backdrop-blur-sm border-gray-200 text-gray-700 hover:bg-white hover:shadow-lg"
         }`}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-label={ariaLabel ?? label}
       >
         <span>
-          {label} {count && count > 0 && `(${count})`}
+          {label}
+          {count !== undefined && count > 0 ? ` (${count})` : ""}
         </span>
         <svg
           className={`w-4 h-4 transition-transform duration-300 ${
@@ -67,6 +61,7 @@ const FilterButton = ({
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          aria-hidden="true"
         >
           <path
             strokeLinecap="round"
@@ -77,7 +72,6 @@ const FilterButton = ({
         </svg>
       </button>
 
-      {/* Dropdown Content */}
       {children && (
         <div className="absolute top-full left-0 mt-2 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-xl z-50">
           {children}
